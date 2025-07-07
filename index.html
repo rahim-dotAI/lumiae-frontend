@@ -3,54 +3,67 @@
 <head>
   <title>LUMIÆ Assistant</title>
   <style>
-    body { font-family: Arial, sans-serif; padding: 20px; max-width: 600px; margin: auto; }
-    textarea { width: 100%; height: 100px; padding: 10px; font-size: 16px; }
-    select, button { margin-top: 10px; padding: 8px; font-size: 16px; }
-    .response { margin-top: 20px; background: #f0f0f0; padding: 10px; border-radius: 8px; font-size: 16px; }
+    body {
+      font-family: Arial, sans-serif;
+      padding: 20px;
+      max-width: 600px;
+      margin: auto;
+    }
+    textarea {
+      width: 100%;
+      height: 100px;
+      padding: 10px;
+      font-size: 16px;
+    }
+    button {
+      margin-top: 10px;
+      padding: 10px 16px;
+      font-size: 16px;
+    }
+    .response {
+      margin-top: 20px;
+      background: #f0f0f0;
+      padding: 10px;
+      border-radius: 8px;
+      font-size: 16px;
+      white-space: pre-wrap;
+    }
   </style>
 </head>
 <body>
   <h1>🤖 Talk to LUMIÆ</h1>
 
-  <label>Choose Personality:</label><br>
-  <select id="mode">
-    <option value="JARVIS">JARVIS</option>
-    <option value="SAMANTHA">SAMANTHA</option>
-    <option value="HAL">HAL</option>
-  </select>
-
-  <br><br>
   <label>Enter your message:</label><br>
-  <textarea id="userText" placeholder="Say something..."></textarea>
-  <br>
+  <textarea id="userText" placeholder="Say something..."></textarea><br>
   <button onclick="sendMessage()">Send</button>
 
   <div class="response" id="output"></div>
 
   <script>
     async function sendMessage() {
-      const text = document.getElementById("userText").value;
-      const mode = document.getElementById("mode").value;
-
-      if (!text.trim()) {
-        document.getElementById("output").innerText = "Please type a message.";
+      const text = document.getElementById("userText").value.trim();
+      const output = document.getElementById("output");
+      if (!text) {
+        output.innerText = "Please type something.";
         return;
       }
+
+      output.innerText = "⏳ Thinking...";
 
       try {
         const res = await fetch("https://lumiae-backend-production.up.railway.app/respond", {
           method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ text, mode })
+          headers: {
+            "Content-Type": "application/json"
+          },
+          body: JSON.stringify({ text })
         });
 
-        if (!res.ok) throw new Error(`HTTP error! status: ${res.status}`);
-
         const data = await res.json();
-        document.getElementById("output").innerText = data.response;
-      } catch (error) {
-        document.getElementById("output").innerText = `❌ Error: ${error.message}`;
-        console.error(error);
+        output.innerText = data.response;
+      } catch (err) {
+        console.error(err);
+        output.innerText = "❌ Error: Failed to connect to LUMIÆ. Try again later.";
       }
     }
   </script>
